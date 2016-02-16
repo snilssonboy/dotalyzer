@@ -1,42 +1,70 @@
-console.log("prutt");
 
+var accountID = ""
+var matchId = ""
+var players;
+var selectedPlayer;
 
-function GetData(){
-	$.get("http://snilssonboy.github.io/dotalyzer/?url=http://www.dotabuff.com/players/48675258/matches", function(response) { alert(response) });
+function GetDeaths(){
+	for(var i = 0; i < players.length; i++){
+		if(players[i].account_id == accountID){
+			selectedPlayer = players[i];
+			console.log(selectedPlayer + " This player died " + selectedPlayer.deaths + " times");
+			if(selectedPlayer.deaths >= 10){
+				$('#container').html("<h4>YOU ARE LE NOOB, U DIED " + selectedPlayer.deaths + " TIMES IN YOUR LAST MATCH :D");
+				$("body").removeClass("normal-d");
+				$("body").removeClass("good-d");
+				$("body").removeClass("bad-d");
+				$("body").addClass("bad-d");
+			}else if(selectedPlayer.deaths <= 2){
+				$('#container').html("<h4>YOU ARE LE OPE PLAYER, U DIED ONLI " + selectedPlayer.deaths + " TIMES IN YOUR LAST MATCH :D");
+				$("body").removeClass("normal-d");
+				$("body").removeClass("good-d");
+				$("body").removeClass("bad-d");
+				$("body").addClass("good-d");
+			}else{
+				$('#container').html("<h4>NEITHER YAY OR NEI, U DIED " + selectedPlayer.deaths + " TIMES IN YOUR LAST MATCH :D");
+				$("body").removeClass("normal-d");
+				$("body").removeClass("good-d");
+				$("body").removeClass("bad-d");
+				$("body").addClass("normal-d");
+			}
+		}
+	}
 }
 
-console.log("test1337");
+function FindPlayer(){
 
-// Accepts a url and a callback function to run.
-function requestCrossDomain( site, callback ) {
-     
-    // If no url was passed, exit.
-    if ( !site ) {
-        alert('No site was passed.');
-        return false;
-    }
-     
-    // Take the provided url, and add it to a YQL query. Make sure you encode it!
-    var yql = 'http://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent('select * from html where url="' + site + '"') + '&format=xml&callback=cbFunc';
-     
-    // Request that YSQL string, and run a callback function.
-    // Pass a defined function to prevent cache-busting.
-    $.getJSON( yql, cbFunc );
-     
-    function cbFunc(data) {
-    // If we have something to work with...
-    if ( data.results[0] ) {
-        // Strip out all script tags, for security reasons.
-        // BE VERY CAREFUL. This helps, but we should do more. 
-        data = data.results[0].replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
-         
-        // If the user passed a callback, and it
-        // is a function, call it, and send through the data var.
-        if ( typeof callback === 'function') {
-            callback(data);
-        }
-    }
-    // Else, Maybe we requested a site that doesn't exist, and nothing returned.
-    else throw new Error('Nothing returned from getJSON.');
-    }
+		var url2 = 'https://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/V001/?match_id=' + matchId + '&key=0BB4221B2151CB106D2462F1ED49A973';
+
+		$.getJSON(url2, function(data) {
+		    // Get the element with id summary and set the inner text to the result.
+		    players = data.result.players;
+		    console.log("Got players");
+		});
+
+
+		setTimeout(function () {
+    		GetDeaths();
+		}, 1500);
+}
+
+function GetData(){
+	accountID = $('#idinput').val();
+	matchId = 'undefinded';
+	players = 'undefinded';
+	selectedPlayer = 'undefinded';
+
+	var url = 'https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/v001/?key=0BB4221B2151CB106D2462F1ED49A973&account_id=' + accountID;
+
+	$.getJSON(url, function(data) {
+    	// Get the element with id summary and set the inner text to the result.
+    	matchId = data.result.matches[0].match_id.toString();
+    	console.log("Got match id");
+	});
+
+	setTimeout(function () {
+    		FindPlayer();
+		}, 1500);
+
+	
 }
